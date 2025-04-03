@@ -1,0 +1,33 @@
+/* Стили для кнопки "Домой" */
+.home-button {
+    position: fixed;
+    bottom: -70px; /* Начальное положение за пределами экрана */
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #ff2d2d;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, background-color 0.2s ease, bottom 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .home-button.show {
+    bottom: 20px; /* Плавное появление кнопки */
+  }
+  
+  .home-button:hover {
+    transform: scale(1.1);
+    background-color: #ff4d00;
+  }
+  
+  .home-icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+  }

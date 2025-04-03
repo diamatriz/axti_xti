@@ -1,0 +1,53 @@
+/* src/styles/releases.css */
+
+.releases-section {
+    display: flex;
+    padding:  auto;
+    background: #FFFFFF;
+  }
+  
+  .release-links {
+    width: 50%;
+    background: rgba(255, 0, 0, 1);
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  .release-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    line-height: 32px;
+    text-decoration: underline;
+    color: #000000;
+    cursor: pointer;
+  }
+  
+  .release-link.active {
+    color: #FFFFFF;
+    font-weight: bold;
+  }
+  
+  .release-player {
+    width: 50%;
+    background: #0D00FC;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  @media (max-width: 768px) {
+    .releases-section {
+      flex-direction: column;
+    }
+  
+    .release-links {
+      width: 100%;
+    }
+  
+    .release-player {
+      width: 100%;
+    }
+  }

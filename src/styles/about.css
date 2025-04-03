@@ -1,0 +1,79 @@
+/* src/styles/about.css */
+
+.about-section {
+    min-height: 150vh;
+    position: relative;
+    padding: 60px 40px; /* Ровный и четкий padding */
+    color: white;
+    text-align: center;
+  }
+  
+  .about-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url(src/assets/about-bg.png);
+    z-index: -1;
+    opacity: 0.8; /* Прозрачность */
+  }
+  
+  .members-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Три колонки */
+    gap: 30px; /* Расстояние между колонками */
+    margin-top: auto;
+  }
+  
+  .member-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .member-image {
+    width: 180px; /* Увеличенный размер фото */
+    height: 180px;
+    object-fit: cover; /* Корректное масштабирование изображений */
+    border: 5px solid transparent; /* Рамка */
+    border-image: linear-gradient(to right, red, blue) 1; /* Красно-синяя рамка */
+    margin-bottom: 20px;
+  }
+  
+  .text-wrapper {
+    width: 100%;
+    height: auto; /* Фиксированная высота для текста */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Скрываем переполнение текста */
+  }
+  
+  .typing-text {
+    font-size: 14px;
+    font-family: 'Dela Gothic One';
+    white-space: wrap; /* Запрещаем перенос строк */
+    visibility: visible; /* Текст всегда видим */
+  }
+  
+  /* Мобильная версия */
+  @media (max-width: 768px) {
+    .about-section {
+      padding: 40px 20px; /* Уменьшенный padding для мобильных устройств */
+    }
+  
+    .members-container {
+      grid-template-columns: 1fr; /* Одна колонка */
+    }
+  
+    .member-image {
+      width: 150px;
+      height: 150px;
+    }
+  
+    .text-wrapper {
+      height: 50px; /* Уменьшенная высота для мобильной версии */
+    }
+  }

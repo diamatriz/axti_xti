@@ -1,0 +1,14 @@
+.dynamic-text {
+    color: white;
+    text-align: center;
+    margin-top: 20px;
+    transition: all 0.1s ease;
+  }
+  
+  .dynamic-text.glow {
+    text-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 50px rgba(13, 0, 252, 1);
+  }
+  
+  .dynamic-text.shadow {
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+  }

@@ -1,0 +1,27 @@
+/* Блокировка прокрутки */
+html, body {
+  overflow: auto;
+  height: 100%;
+}
+
+body {
+  background: #0a0a0a;
+  color: #f0f0f0;
+  font-family: 'Roboto Mono', monospace;
+  margin: 0;
+  padding: 0;
+}
+
+/* Отступ под навигационной панелью */
+main {
+  margin-top: 70px; /* Высота навигационной панели */
+  position: relative;
+  z-index: 1;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  main {
+    margin-top: 60px; /* Уменьшаем отступ на мобильных устройствах */
+  }
+}

@@ -1,0 +1,17 @@
+.page-container {
+    padding: 20px;
+    color: white;
+    height: 100%;
+  }
+  
+  .page-container h1 {
+    font-family: 'Dela Gothic One', cursive;
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    color: #ff2d2d;
+  }
+  
+  .content {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
