@@ -1,3 +1,5 @@
+/* src/styles/main.css */
+@import './variables.css';
 /* Блокировка прокрутки */
 html, body {
   overflow: auto;

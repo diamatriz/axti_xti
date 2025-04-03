@@ -2,6 +2,7 @@
 
 .about-section {
     min-height: 150vh;
+    height: 100%;
     position: relative;
     padding: 60px 40px; /* Ровный и четкий padding */
     color: white;
@@ -14,7 +15,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: url(src/assets/about-bg.png);
+    background: url(src/assets/about-bg.jpg);
     z-index: -1;
     opacity: 0.8; /* Прозрачность */
   }
@@ -39,7 +40,7 @@
     object-fit: cover; /* Корректное масштабирование изображений */
     border: 5px solid transparent; /* Рамка */
     border-image: linear-gradient(to right, red, blue) 1; /* Красно-синяя рамка */
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
   
   .text-wrapper {
@@ -52,7 +53,7 @@
   }
   
   .typing-text {
-    font-size: 14px;
+    font-size: 16px;
     font-family: 'Dela Gothic One';
     white-space: wrap; /* Запрещаем перенос строк */
     visibility: visible; /* Текст всегда видим */
@@ -61,7 +62,7 @@
   /* Мобильная версия */
   @media (max-width: 768px) {
     .about-section {
-      padding: 40px 20px; /* Уменьшенный padding для мобильных устройств */
+      padding: 40px 10px; /* Уменьшенный padding для мобильных устройств */
     }
   
     .members-container {
@@ -69,11 +70,12 @@
     }
   
     .member-image {
-      width: 150px;
-      height: 150px;
+      width: 200px;
+      height: 200px;
     }
   
     .text-wrapper {
-      height: 50px; /* Уменьшенная высота для мобильной версии */
+      height: 200px;
+      overflow: auto; /* Уменьшенная высота для мобильной версии */
     }
   }

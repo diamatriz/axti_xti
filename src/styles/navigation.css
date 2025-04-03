@@ -66,13 +66,13 @@
 /* Адаптация */
 @media (max-width: 768px) {
   .main-nav {
-    height: 60px;
+    height: 70px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
   
   .nav-text {
-    font-size: 18px;
+    font-size: 16px;
   }
   
   .nav-button {

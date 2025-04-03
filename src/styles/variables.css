@@ -1,0 +1,10 @@
+/* src/styles/variables.css */
+:root {
+    --primary-color: #FF0000;
+    --secondary-color: #0D00FC;
+    --text-color: #FFFFFF;
+    --padding-large: 60px;
+    --padding-small: 20px;
+    --font-size-large: 24px;
+    --font-size-small: 16px;
+  }
