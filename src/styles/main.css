@@ -12,6 +12,7 @@ body {
   font-family: 'Roboto Mono', monospace;
   margin: 0;
   padding: 0;
+  z-index: -1;
 }
 
 /* Отступ под навигационной панелью */

@@ -1,0 +1,91 @@
+/* src/styles/video.css */
+
+.video-section {
+    display: flex;
+    flex-wrap: wrap; /* Разрешаем перенос для мобильных устройств */
+    margin: 0;
+    padding: 0;
+    background: #FFFFFF;
+  }
+  
+  .video-links {
+    flex: 1; /* Занимает всю доступную ширину */
+    min-height: 50%;
+    min-width: 300px; /* Минимальная ширина для мобильных */
+    background: rgba(255, 0, 0, 1);
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .video-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(16px, 2vw, 24px); /* Адаптивный размер шрифта */
+    line-height: 2;
+    text-decoration: underline;
+    color: #000000;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .video-link.active {
+    color: #FFFFFF;
+    font-weight: bold;
+  }
+  
+  .video-player {
+    flex: 0.25; /* Занимает всю доступную ширину */
+    min-height: 50%;
+    min-width: 100%; /* Минимальная ширина для мобильных */
+    background: #0D00FC;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: left;
+    align-items: left;
+  }
+  
+  .video-player iframe {
+    width: 100%;
+    height: clamp(100%, 100%, 100%); /* Адаптивная высота iframe */
+    border: none;
+  }
+  
+  /* Медиа-запросы */
+  @media (min-width: 769px) {
+    .video-links,
+    .video-player {
+      flex: 1 1 50%; /* На больших экранах обе зоны занимают половину ширины */
+      min-width: 50%; /* Отменяем минимальную ширину */
+    }
+  }
+  @media (min-width: 1800px) {
+    .video-links,
+    .video-player {
+      flex: 1 1 50%; /* На больших экранах обе зоны занимают половину ширины */
+      min-width: 0; /* Отменяем минимальную ширину */
+    }
+    .video-link {
+      font-size: clamp(3vh, 3vw, 20px); /* Уменьшаем шрифт для мобильных */
+    }
+  
+    .video-player iframe {
+      height: clamp(100vh, 50vh, 50vh); /* Еще более адаптивная высота */
+    }
+  }
+  @media (max-width: 768px) {
+    .video-links,
+    .video-player {
+      flex: 1 1 50%; /* На маленьких экранах каждая зона занимает всю ширину */
+    }
+  
+    .video-link {
+      font-size: clamp(14px, 2vw, 20px); /* Уменьшаем шрифт для мобильных */
+    }
+  
+    .video-player iframe {
+      height: clamp(200px, 50vh, 800px); /* Еще более адаптивная высота */
+    }
+  }

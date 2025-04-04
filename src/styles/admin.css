@@ -1,0 +1,39 @@
+/* src/styles/admin.css */
+
+.admin-page {
+    text-align: center;
+    padding: 40px;
+  }
+  
+  .publish-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .publish-form input,
+  .publish-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .publish-form button {
+    width: 100%;
+    padding: 10px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .publish-form button:hover {
+    background: #218838;
+  }
+  
+  .error {
+    color: red;
+    font-size: 14px;
+  }

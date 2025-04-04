@@ -1,5 +1,4 @@
 import React from 'react';
-import DynamicText from './DynamicText';
 import '../styles/hero.css';
 
 const HeroSection = () => {
@@ -21,11 +20,6 @@ const HeroSection = () => {
 
       {/* Оверлей для затемнения видео */}
       <div className="hero-overlay"></div>
-
-      {/* Текст поверх видео */}
-      <div className="hero-content">
-        <DynamicText />
-      </div>
     </div>
   );
 };
