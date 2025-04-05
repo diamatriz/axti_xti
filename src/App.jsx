@@ -1,5 +1,5 @@
 // src/App.jsx
-import { Routes, Route, Navigate, useRouteError } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -11,6 +11,7 @@ import Merch from './pages/Merch';
 import Contacts from './pages/Contacts';
 import Admin from './pages/Admin';
 import Dashboard from './pages/Dashboard';
+import NotFound from './pages/NotFound'; // Страница 404
 import { useAuth } from './context/AuthContext';
 
 // Компонент для защиты маршрутов
@@ -18,7 +19,7 @@ const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
 
   if (!user) {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -29,23 +30,10 @@ const AdminRoute = ({ children }) => {
   const { user } = useAuth();
 
   if (!user || user.role !== 'admin') {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
-};
-
-// Обработчик ошибок для React Router
-const ErrorBoundary = () => {
-  const error = useRouteError();
-  console.error('Ошибка в маршруте:', error);
-
-  return (
-    <div>
-      <h2>Произошла ошибка</h2>
-      <p>Пожалуйста, попробуйте позже.</p>
-    </div>
-  );
 };
 
 export default function App() {
@@ -86,8 +74,8 @@ export default function App() {
             }
           />
 
-          {/* Обработчик ошибок */}
-          <Route path="*" element={<ErrorBoundary />} />
+          {/* Страница 404 Not Found */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </>
