@@ -8,10 +8,8 @@ import sharp from 'sharp';
 // Загружаем переменные окружения
 dotenv.config();
 
-// Инициализация бота в режиме polling
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { 
-  polling: true 
-});
+// Инициализация бота в режиме вебхука
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
 
 // Инициализация Supabase клиента
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
@@ -178,6 +176,35 @@ bot.on('callback_query', async (query) => {
 
       if (error) throw error;
 
+      // Отправляем сообщение в группу
+      try {
+        const groupChatId = process.env.TELEGRAM_CHAT_ID;
+        let message = `📢 Новая новость!\n\n${state.title}\n\n${state.description}`;
+        
+        if (state.image) {
+          await bot.sendPhoto(groupChatId, state.image, { caption: message });
+        } else {
+          await bot.sendMessage(groupChatId, message);
+        }
+      } catch (telegramError) {
+        if (telegramError.response?.body?.parameters?.migrate_to_chat_id) {
+          // Обновляем chat_id в переменных окружения
+          const newChatId = telegramError.response.body.parameters.migrate_to_chat_id;
+          console.log(`Группа была преобразована в супергруппу. Новый chat_id: ${newChatId}`);
+          process.env.TELEGRAM_CHAT_ID = newChatId;
+          
+          // Повторяем отправку с новым chat_id
+          let message = `📢 Новая новость!\n\n${state.title}\n\n${state.description}`;
+          if (state.image) {
+            await bot.sendPhoto(newChatId, state.image, { caption: message });
+          } else {
+            await bot.sendMessage(newChatId, message);
+          }
+        } else {
+          console.error('Ошибка при отправке в Telegram:', telegramError);
+        }
+      }
+
       bot.sendMessage(chatId, 'Новость успешно опубликована!');
       clearPostState(chatId);
     } catch (err) {
@@ -191,4 +218,4 @@ bot.on('callback_query', async (query) => {
 });
 
 // Экспортируем бота
-export default bot;
+export { bot };

@@ -162,12 +162,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Что-то пошло не так!' });
 });
 
-// Экспортируем сервер для Vercel
-export default app;
-
 // Запускаем сервер локально только в режиме разработки
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
     console.log(`Сервер запущен на http://localhost:${port}`);
   });
 }
+
+// Экспортируем сервер для Vercel
+export default app;
