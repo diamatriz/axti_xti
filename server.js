@@ -36,12 +36,6 @@ app.use(express.static(join(__dirname, 'dist')));
 // Настройка Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// Маршрут для вебхуков
-app.post('/api/webhook', (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
-});
-
 // Корневой маршрут
 app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'));

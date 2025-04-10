@@ -8,8 +8,8 @@ import sharp from 'sharp';
 // Загружаем переменные окружения
 dotenv.config();
 
-// Инициализация бота в режиме вебхука
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+// Инициализация бота в режиме long polling
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 // Инициализация Supabase клиента
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
@@ -218,4 +218,4 @@ bot.on('callback_query', async (query) => {
 });
 
 // Экспортируем бота
-export { bot };
+export default bot;
