@@ -1,22 +1,20 @@
 // bot.js
 import TelegramBot from 'node-telegram-bot-api';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 import axios from 'axios';
 import sharp from 'sharp';
-import { createClient } from '@supabase/supabase-js';
 
-// Токен вашего бота
-const TELEGRAM_BOT_TOKEN = '7795378511:AAGQ0PVNNM-Bl2eQnx1CguLKiJuXUL0ghsc';
+// Загружаем переменные окружения
+dotenv.config();
 
-// Создаем экземпляр бота
-const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+// Инициализация бота в режиме polling
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { 
+  polling: true 
+});
 
-// Настройка Supabase
-const SUPABASE_URL = 'https://pgaypklckjbiozsgboil.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnYXlwa2xja2piaW96c2dib2lsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NzQ4ODksImV4cCI6MjA1OTM1MDg4OX0.t87SHdkWm9sot2L-fFi-WUULKRvx9S-GhoIHDquj-4o';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// URL вашего API
-const API_URL = 'http://localhost:5000/api/add-news'; // Замените на реальный URL
+// Инициализация Supabase клиента
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // Хранилище состояний
 const postStates = {};
@@ -37,17 +35,16 @@ function clearPostState(chatId) {
 // Обработчик команды /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-
   bot.sendMessage(chatId, 'Добро пожаловать! Введите команду /create_post, чтобы создать новость.');
 });
 
 // Обработчик команды /create_post
 bot.onText(/\/create_post/, (msg) => {
   const chatId = msg.chat.id;
-
+  
   // Очищаем старое состояние
   clearPostState(chatId);
-
+  
   // Запрашиваем заголовок
   const state = getPostState(chatId);
   state.step = 'title';
@@ -57,7 +54,7 @@ bot.onText(/\/create_post/, (msg) => {
 // Обработчик текстовых сообщений
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
-  const text = msg.text; // Текст сообщения
+  const text = msg.text;
   const state = getPostState(chatId);
 
   if (!state.step) {
@@ -115,7 +112,7 @@ bot.on('photo', async (msg) => {
 
       // Загружаем файл в Supabase
       const { data, error } = await supabase.storage
-        .from('news-images') // Убедитесь, что bucket существует
+        .from('news-images')
         .upload(fileName, imageBuffer, {
           contentType: 'image/jpeg',
         });
@@ -127,7 +124,7 @@ bot.on('photo', async (msg) => {
       }
 
       // Сохраняем публичную ссылку на изображение
-      state.image = `${SUPABASE_URL}/storage/v1/object/public/news-images/${fileName}`;
+      state.image = `${process.env.SUPABASE_URL}/storage/v1/object/public/news-images/${fileName}`;
 
       // Показываем предпросмотр
       showPreview(chatId, state);
@@ -168,21 +165,23 @@ bot.on('callback_query', async (query) => {
 
   if (data === 'publish') {
     try {
-      // Отправляем данные на сервер
-      const response = await axios.post(API_URL, {
-        title: state.title,
-        description: state.description,
-        image_url: state.image || null,
-      });
+      // Добавляем новость в базу данных
+      const { data, error } = await supabase
+        .from('news')
+        .insert([{ 
+          title: state.title,
+          description: state.description,
+          image_url: state.image || null,
+          created_at: new Date().toISOString()
+        }])
+        .select();
 
-      if (response.status === 201) {
-        bot.sendMessage(chatId, 'Пост успешно опубликован!');
-        clearPostState(chatId);
-      } else {
-        bot.sendMessage(chatId, 'Ошибка при публикации.');
-      }
+      if (error) throw error;
+
+      bot.sendMessage(chatId, 'Новость успешно опубликована!');
+      clearPostState(chatId);
     } catch (err) {
-      console.error('Ошибка при отправке запроса:', err.message);
+      console.error('Ошибка при публикации:', err.message);
       bot.sendMessage(chatId, 'Произошла ошибка при публикации.');
     }
   } else if (data === 'cancel') {
@@ -190,3 +189,6 @@ bot.on('callback_query', async (query) => {
     bot.sendMessage(chatId, 'Создание поста отменено.');
   }
 });
+
+// Экспортируем бота
+export default bot;
