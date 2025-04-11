@@ -28,6 +28,9 @@
     },
     {
       "src": "/(.*)",
+      "headers": {
+        "Content-Type": "text/html"
+      },
       "dest": "/index.html"
     }
   ]
