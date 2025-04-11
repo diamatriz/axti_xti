@@ -1,6 +1,5 @@
 // src/pages/About.jsx
-import React, { useEffect, useRef } from 'react'; // Добавляем импорт useEffect и useRef
-import { useSwipeable } from 'react-swipeable'; // Библиотека для свайпов
+import React, { useEffect, useRef } from 'react';
 import '../styles/about.css'; // Стили для About секции
 import TypingText from '../components/TypingText'; // Компонент для анимации текста
 import member1 from '../assets/member1.jpg'; // Изображения участников
