@@ -71,11 +71,11 @@ bot.on('message', async (msg) => {
     state.title = text;
 
     // Переходим к следующему шагу
-    state.step = 'description';
+    state.step = 'content';
     bot.sendMessage(chatId, 'Заголовок сохранён. Введите текст новости:');
-  } else if (state.step === 'description') {
+  } else if (state.step === 'content') {
     // Сохраняем текст новости
-    state.description = text;
+    state.content = text;
 
     // Запрашиваем изображение
     state.step = 'image';
@@ -135,7 +135,7 @@ bot.on('photo', async (msg) => {
 
 // Функция для показа предпросмотра
 async function showPreview(chatId, state) {
-  let previewText = `Заголовок: ${state.title}\n\nТекст: ${state.description}`;
+  let previewText = `Заголовок: ${state.title}\n\nТекст: ${state.content}`;
   if (state.image) {
     previewText += '\n\nИзображение: ✅';
   } else {
@@ -168,7 +168,7 @@ bot.on('callback_query', async (query) => {
         .from('news')
         .insert([{ 
           title: state.title,
-          description: state.description,
+          content: state.content,
           image_url: state.image || null,
           created_at: new Date().toISOString()
         }])
@@ -179,7 +179,7 @@ bot.on('callback_query', async (query) => {
       // Отправляем сообщение в группу
       try {
         const groupChatId = process.env.TELEGRAM_CHAT_ID;
-        let message = `📢 Новая новость!\n\n${state.title}\n\n${state.description}`;
+        let message = `📢 Новая новость!\n\n${state.title}\n\n${state.content}`;
         
         if (state.image) {
           await bot.sendPhoto(groupChatId, state.image, { caption: message });
@@ -194,7 +194,7 @@ bot.on('callback_query', async (query) => {
           process.env.TELEGRAM_CHAT_ID = newChatId;
           
           // Повторяем отправку с новым chat_id
-          let message = `📢 Новая новость!\n\n${state.title}\n\n${state.description}`;
+          let message = `📢 Новая новость!\n\n${state.title}\n\n${state.content}`;
           if (state.image) {
             await bot.sendPhoto(newChatId, state.image, { caption: message });
           } else {

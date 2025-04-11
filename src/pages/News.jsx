@@ -7,23 +7,18 @@ const News = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Загрузка новостей из Supabase
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch('https://pgaypklckjbiozsgboil.supabase.co/rest/v1/news?select=*', {
-          headers: {
-            apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnYXlwa2xja2piaW96c2dib2lsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NzQ4ODksImV4cCI6MjA1OTM1MDg4OX0.t87SHdkWm9sot2L-fFi-WUULKRvx9S-GhoIHDquj-4o',
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnYXlwa2xja2piaW96c2dib2lsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NzQ4ODksImV4cCI6MjA1OTM1MDg4OX0.t87SHdkWm9sot2L-fFi-WUULKRvx9S-GhoIHDquj-4o`,
-          },
-        });
-        if (!response.ok) throw new Error('Ошибка при загрузке новостей');
-
+        const response = await fetch('/api/news');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         const data = await response.json();
-        setNews(data.reverse()); // Отображаем новости в обратном порядке (новые сверху)
-        setLoading(false);
+        setNews(data);
       } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -31,34 +26,36 @@ const News = () => {
     fetchNews();
   }, []);
 
-  if (loading) return <p>Загрузка...</p>;
-  if (error) return <p>Ошибка: {error}</p>;
+  if (loading) return <div className="loading">Загрузка новостей...</div>;
+  if (error) return <div className="error">Ошибка: {error}</div>;
 
   return (
-    <div className="news-page">
-      <h1>Лента новостей</h1>
-      <div className="news-feed">
-        {news.length === 0 ? (
-          <p>Нет новостей.</p>
-        ) : (
-          news.map((item) => (
-            <div key={item.id} className="news-item">
-              <h2>{item.title}</h2>
-              <p>{item.description}</p>
-              {item.link && (
-                <a href={item.link} target="_blank" rel="noopener noreferrer" className="news-link">
-                  Подробнее
-                </a>
-              )}
+    <section className="news-section">
+      <div className="news-background"></div>
+      <div className="news-container">
+        <h1 className="news-title">Новости</h1>
+        <div className="news-grid">
+          {news.map((item) => (
+            <div key={item.id} className="news-card">
               {item.image_url && (
                 <img src={item.image_url} alt={item.title} className="news-image" />
               )}
-              <small>{new Date(item.created_at).toLocaleDateString()}</small>
+              <div className="news-content">
+                <h2 className="news-item-title">{item.title}</h2>
+                <p className="news-item-text">{item.content}</p>
+                <div className="news-date">
+                  {new Date(item.created_at).toLocaleDateString('ru-RU', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </div>
+              </div>
             </div>
-          ))
-        )}
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
