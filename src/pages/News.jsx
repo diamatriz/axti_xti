@@ -7,7 +7,6 @@ const News = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedNews, setSelectedNews] = useState(null);
 
   useEffect(() => {
     console.log('Компонент News монтируется');
@@ -42,31 +41,6 @@ const News = () => {
     }
   };
 
-  const handleNewsClick = (newsItem) => {
-    setSelectedNews(newsItem);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedNews(null);
-  };
-
-  const handleDownloadImage = async (imageUrl) => {
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `news-image-${Date.now()}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error('Ошибка при скачивании изображения:', err);
-    }
-  };
-
   if (loading) return <div className="loading">Загрузка новостей...</div>;
   if (error) return <div className="error">Ошибка: {error}</div>;
   if (!news.length) return <div className="error">Новостей пока нет</div>;
@@ -76,11 +50,7 @@ const News = () => {
       <div className="news-background"></div>
       <div className="news-grid">
         {news.map((item) => (
-          <article 
-            key={item.id} 
-            className="news-card"
-            onClick={() => handleNewsClick(item)}
-          >
+          <article key={item.id} className="news-card">
             {item.image_url && (
               <img 
                 src={item.image_url} 
@@ -102,34 +72,6 @@ const News = () => {
           </article>
         ))}
       </div>
-
-      {selectedNews && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={handleCloseModal}>×</button>
-            {selectedNews.image_url && (
-              <>
-                <img 
-                  src={selectedNews.image_url} 
-                  alt={selectedNews.title} 
-                  className="modal-image"
-                />
-                <button 
-                  className="download-button"
-                  onClick={() => handleDownloadImage(selectedNews.image_url)}
-                >
-                  Скачать изображение
-                </button>
-              </>
-            )}
-            <h2 className="modal-title">{selectedNews.title}</h2>
-            <p className="modal-text">{selectedNews.content}</p>
-            <div className="modal-date">
-              {new Date(selectedNews.created_at).toLocaleDateString()}
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 };

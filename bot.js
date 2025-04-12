@@ -17,8 +17,8 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
   process.exit(1);
 }
 
-// Инициализация бота в режиме long polling
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+// Инициализация бота
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // Инициализация Supabase клиента
 const supabase = createClient(
@@ -33,208 +33,346 @@ const supabase = createClient(
   }
 );
 
-// Хранилище состояний
-const postStates = {};
+// Состояние бота
+const botState = {
+  awaitingTitle: false,
+  awaitingText: false,
+  awaitingImage: false,
+  currentNews: null,
+  currentStep: null
+};
 
-// Функция для получения состояния
-function getPostState(chatId) {
-  if (!postStates[chatId]) {
-    postStates[chatId] = {};
+// Функция для форматирования новости
+const formatNews = (news) => {
+  return `📰 *${news.title}*\n\n${news.text}\n\n🕒 ${new Date(news.created_at).toLocaleString()}`;
+};
+
+// Функция для форматирования предпросмотра новости
+const formatPreview = (news) => {
+  let preview = `📰 *Предпросмотр новости*\n\n`;
+  preview += `*Заголовок:* ${news.title || '❌ Не указан'}\n\n`;
+  preview += `*Текст:* ${news.content || '❌ Не указан'}\n\n`;
+  preview += `*Изображение:* ${news.image_url ? '✅ Добавлено' : '❌ Отсутствует'}\n\n`;
+  preview += `_Используйте кнопки ниже для навигации_`;
+  return preview;
+};
+
+// Функция для создания клавиатуры предпросмотра
+const createPreviewKeyboard = (news) => {
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: '✏️ Заголовок', callback_data: 'edit_title' },
+          { text: '✏️ Текст', callback_data: 'edit_content' }
+        ],
+        [
+          { text: '✏️ Изображение', callback_data: 'edit_image' }
+        ],
+        [
+          { text: '✅ Опубликовать', callback_data: 'publish' }
+        ]
+      ]
+    }
+  };
+};
+
+// Функция для получения списка новостей
+const getNewsList = async () => {
+  const { data, error } = await supabase
+    .from('news')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Ошибка при получении новостей:', error);
+    return null;
   }
-  return postStates[chatId];
-}
+  return data;
+};
 
-// Функция для очистки состояния
-function clearPostState(chatId) {
-  delete postStates[chatId];
-}
+// Функция для удаления новости
+const deleteNews = async (newsId) => {
+  const { error } = await supabase
+    .from('news')
+    .delete()
+    .eq('id', newsId);
+
+  if (error) {
+    console.error('Ошибка при удалении новости:', error);
+    return false;
+  }
+  return true;
+};
+
+// Функция для создания клавиатуры навигации
+const createNavigationKeyboard = (step) => {
+  const keyboard = {
+    reply_markup: {
+      inline_keyboard: []
+    }
+  };
+
+  switch (step) {
+    case 'title':
+      keyboard.reply_markup.inline_keyboard.push([
+        { text: '➡️ Далее', callback_data: 'next_step' }
+      ]);
+      break;
+    case 'content':
+      keyboard.reply_markup.inline_keyboard.push([
+        { text: '⬅️ Назад', callback_data: 'prev_step' },
+        { text: '➡️ Далее', callback_data: 'next_step' }
+      ]);
+      break;
+    case 'image':
+      keyboard.reply_markup.inline_keyboard.push([
+        { text: '⬅️ Назад', callback_data: 'prev_step' },
+        { text: '➡️ Пропустить', callback_data: 'skip_image' }
+      ]);
+      break;
+    case 'preview':
+      keyboard.reply_markup.inline_keyboard.push([
+        { text: '⬅️ Назад', callback_data: 'prev_step' },
+        { text: '✅ Опубликовать', callback_data: 'publish' }
+      ]);
+      break;
+  }
+
+  return keyboard;
+};
 
 // Обработчик команды /start
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'Добро пожаловать! Введите команду /create_post, чтобы создать новость.');
-});
-
-// Обработчик команды /create_post
-bot.onText(/\/create_post/, (msg) => {
-  const chatId = msg.chat.id;
-  
-  // Очищаем старое состояние
-  clearPostState(chatId);
-  
-  // Запрашиваем заголовок
-  const state = getPostState(chatId);
-  state.step = 'title';
-  bot.sendMessage(chatId, 'Введите заголовок новости:');
-});
-
-// Обработчик текстовых сообщений
-bot.on('message', async (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text;
-  const state = getPostState(chatId);
-
-  if (!state.step) {
-    bot.sendMessage(chatId, 'Нажмите /create_post, чтобы создать новость.');
-    return;
-  }
-
-  // Проверяем, что сообщение содержит текст
-  if (!text && state.step !== 'image') {
-    bot.sendMessage(chatId, 'Пожалуйста, отправьте текстовое сообщение.');
-    return;
-  }
-
-  if (state.step === 'title') {
-    // Сохраняем заголовок
-    state.title = text;
-
-    // Переходим к следующему шагу
-    state.step = 'content';
-    bot.sendMessage(chatId, 'Заголовок сохранён. Введите текст новости:');
-  } else if (state.step === 'content') {
-    // Сохраняем текст новости
-    state.content = text;
-
-    // Запрашиваем изображение
-    state.step = 'image';
-    bot.sendMessage(chatId, 'Текст сохранён. Отправьте изображение для поста или напишите "пропустить".');
-  } else if (state.step === 'image') {
-    if (text && text.toLowerCase() === 'пропустить') {
-      state.image = null; // Пропускаем изображение
-      showPreview(chatId, state);
-    } else {
-      bot.sendMessage(chatId, 'Пожалуйста, отправьте изображение или напишите "пропустить".');
+bot.command('start', async (ctx) => {
+  const keyboard = {
+    reply_markup: {
+      keyboard: [
+        ['📝 Добавить новость'],
+        ['📋 Список новостей'],
+        ['❌ Удалить новость']
+      ],
+      resize_keyboard: true
     }
-  }
+  };
+
+  await ctx.reply(
+    '👋 Добро пожаловать в панель управления новостями!\n\n' +
+    'Выберите действие:',
+    keyboard
+  );
 });
 
-// Обработка изображений
-bot.on('photo', async (msg) => {
-  const chatId = msg.chat.id;
-  const state = getPostState(chatId);
-
-  if (state.step === 'image') {
-    try {
-      // Получаем самое качественное фото
-      const photoFileId = msg.photo[msg.photo.length - 1].file_id;
-
-      // Скачиваем файл с Telegram
-      const fileLink = await bot.getFileLink(photoFileId);
-      const response = await axios.get(fileLink, { responseType: 'arraybuffer' });
-      const imageBuffer = response.data;
-
-      // Генерируем уникальное имя файла
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
-
-      // Загружаем файл в Supabase
-      const { data, error } = await supabase.storage
-        .from('news-images')
-        .upload(fileName, imageBuffer, {
-          contentType: 'image/jpeg',
-        });
-
-      if (error) {
-        console.error('[ERROR] Failed to upload image to Supabase:', error.message);
-        bot.sendMessage(chatId, 'Ошибка при загрузке изображения. Попробуйте снова.');
-        return;
-      }
-
-      // Сохраняем публичную ссылку на изображение
-      state.image = `${process.env.SUPABASE_URL}/storage/v1/object/public/news-images/${fileName}`;
-
-      // Показываем предпросмотр
-      showPreview(chatId, state);
-    } catch (err) {
-      console.error('[ERROR] Failed to process image:', err.message);
-      bot.sendMessage(chatId, 'Произошла ошибка при обработке изображения.');
-    }
-  }
+// Обработчик кнопки "Добавить новость"
+bot.hears('📝 Добавить новость', (ctx) => {
+  botState.currentNews = {};
+  botState.currentStep = 'title';
+  botState.awaitingTitle = true;
+  
+  const keyboard = createNavigationKeyboard('title');
+  ctx.reply('Введите заголовок новости:', keyboard);
 });
 
-// Функция для показа предпросмотра
-async function showPreview(chatId, state) {
-  let previewText = `Заголовок: ${state.title}\n\nТекст: ${state.content}`;
-  if (state.image) {
-    previewText += '\n\nИзображение: ✅';
-  } else {
-    previewText += '\n\nИзображение: ❌ (пропущено)';
+// Обработчик кнопки "Список новостей"
+bot.hears('📋 Список новостей', async (ctx) => {
+  const newsList = await getNewsList();
+  
+  if (!newsList || newsList.length === 0) {
+    return ctx.reply('Новостей пока нет.');
   }
 
-  // Добавляем кнопки для подтверждения
+  // Отправляем первую новость
+  const firstNews = newsList[0];
   const keyboard = {
     reply_markup: {
       inline_keyboard: [
-        [{ text: 'Опубликовать', callback_data: 'publish' }],
-        [{ text: 'Отменить', callback_data: 'cancel' }],
-      ],
-    },
+        [
+          { text: '⬅️ Предыдущая', callback_data: 'prev_news' },
+          { text: '➡️ Следующая', callback_data: 'next_news' }
+        ],
+        [
+          { text: '❌ Удалить', callback_data: `delete_${firstNews.id}` }
+        ]
+      ]
+    }
   };
 
-  bot.sendMessage(chatId, previewText, keyboard);
-}
+  await ctx.replyWithMarkdown(formatNews(firstNews), keyboard);
+  botState.currentNewsIndex = 0;
+  botState.newsList = newsList;
+});
 
-// Обработчик нажатия кнопок
-bot.on('callback_query', async (query) => {
-  const chatId = query.message.chat.id;
-  const data = query.data;
-  const state = getPostState(chatId);
+// Обработчик кнопки "Удалить новость"
+bot.hears('❌ Удалить новость', async (ctx) => {
+  const newsList = await getNewsList();
+  
+  if (!newsList || newsList.length === 0) {
+    return ctx.reply('Новостей пока нет.');
+  }
 
-  if (data === 'publish') {
-    try {
-      // Добавляем новость в базу данных
-      const { data, error } = await supabase
-        .from('news')
-        .insert([{ 
-          title: state.title,
-          content: state.content,
-          image_url: state.image || null,
-          created_at: new Date().toISOString()
-        }])
-        .select();
-
-      if (error) throw error;
-
-      // Отправляем сообщение в группу
-      try {
-        const groupChatId = process.env.TELEGRAM_CHAT_ID;
-        let message = `📢 Новая новость!\n\n${state.title}\n\n${state.content}`;
-        
-        if (state.image) {
-          await bot.sendPhoto(groupChatId, state.image, { caption: message });
-        } else {
-          await bot.sendMessage(groupChatId, message);
-        }
-      } catch (telegramError) {
-        if (telegramError.response?.body?.parameters?.migrate_to_chat_id) {
-          // Обновляем chat_id в переменных окружения
-          const newChatId = telegramError.response.body.parameters.migrate_to_chat_id;
-          console.log(`Группа была преобразована в супергруппу. Новый chat_id: ${newChatId}`);
-          process.env.TELEGRAM_CHAT_ID = newChatId;
-          
-          // Повторяем отправку с новым chat_id
-          let message = `📢 Новая новость!\n\n${state.title}\n\n${state.content}`;
-          if (state.image) {
-            await bot.sendPhoto(newChatId, state.image, { caption: message });
-          } else {
-            await bot.sendMessage(newChatId, message);
-          }
-        } else {
-          console.error('Ошибка при отправке в Telegram:', telegramError);
-        }
-      }
-
-      bot.sendMessage(chatId, 'Новость успешно опубликована!');
-      clearPostState(chatId);
-    } catch (err) {
-      console.error('Ошибка при публикации:', err.message);
-      bot.sendMessage(chatId, 'Произошла ошибка при публикации.');
+  const keyboard = {
+    reply_markup: {
+      inline_keyboard: newsList.map(news => [
+        { text: news.title, callback_data: `delete_${news.id}` }
+      ])
     }
-  } else if (data === 'cancel') {
-    clearPostState(chatId);
-    bot.sendMessage(chatId, 'Создание поста отменено.');
+  };
+
+  await ctx.reply('Выберите новость для удаления:', keyboard);
+});
+
+// Обработчик текстовых сообщений
+bot.on('text', async (ctx) => {
+  if (botState.awaitingTitle) {
+    if (botState.currentStep === 'edit_title') {
+      botState.currentNews.title = ctx.message.text;
+      const preview = formatPreview(botState.currentNews);
+      const keyboard = createPreviewKeyboard(botState.currentNews);
+      await ctx.replyWithMarkdown(preview, keyboard);
+    } else {
+      botState.currentNews.title = ctx.message.text;
+      botState.awaitingTitle = false;
+      botState.awaitingText = true;
+      botState.currentStep = 'content';
+      const keyboard = createNavigationKeyboard('content');
+      ctx.reply('Введите текст новости:', keyboard);
+    }
+  } else if (botState.awaitingText) {
+    if (botState.currentStep === 'edit_content') {
+      botState.currentNews.content = ctx.message.text;
+      const preview = formatPreview(botState.currentNews);
+      const keyboard = createPreviewKeyboard(botState.currentNews);
+      await ctx.replyWithMarkdown(preview, keyboard);
+    } else {
+      botState.currentNews.content = ctx.message.text;
+      botState.awaitingText = false;
+      botState.awaitingImage = true;
+      botState.currentStep = 'image';
+      const keyboard = createNavigationKeyboard('image');
+      ctx.reply('Отправьте изображение для новости:', keyboard);
+    }
   }
 });
+
+// Обработчик изображений
+bot.on('photo', async (ctx) => {
+  if (botState.awaitingImage) {
+    const photo = ctx.message.photo[ctx.message.photo.length - 1];
+    const file = await ctx.telegram.getFile(photo.file_id);
+    const fileUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+    
+    botState.currentNews.image_url = fileUrl;
+    
+    if (botState.currentStep === 'edit_image') {
+      const preview = formatPreview(botState.currentNews);
+      const keyboard = createPreviewKeyboard(botState.currentNews);
+      await ctx.replyWithMarkdown(preview, keyboard);
+    } else {
+      botState.awaitingImage = false;
+      botState.currentStep = 'preview';
+      const preview = formatPreview(botState.currentNews);
+      const keyboard = createPreviewKeyboard(botState.currentNews);
+      await ctx.replyWithMarkdown(preview, keyboard);
+    }
+  }
+});
+
+// Обработчик команды /skip
+bot.command('skip', async (ctx) => {
+  if (botState.awaitingImage) {
+    await saveNews(ctx);
+  }
+});
+
+// Обработчик callback-запросов
+bot.on('callback_query', async (ctx) => {
+  const data = ctx.callbackQuery.data;
+  
+  if (data === 'next_news' || data === 'prev_news') {
+    const newsList = botState.newsList;
+    if (!newsList) return;
+
+    if (data === 'prev_news') {
+      botState.currentNewsIndex = (botState.currentNewsIndex - 1 + newsList.length) % newsList.length;
+    } else {
+      botState.currentNewsIndex = (botState.currentNewsIndex + 1) % newsList.length;
+    }
+
+    const currentNews = newsList[botState.currentNewsIndex];
+  const keyboard = {
+    reply_markup: {
+      inline_keyboard: [
+          [
+            { text: '⬅️ Предыдущая', callback_data: 'prev_news' },
+            { text: '➡️ Следующая', callback_data: 'next_news' }
+          ],
+          [
+            { text: '❌ Удалить', callback_data: `delete_${currentNews.id}` }
+          ]
+        ]
+      }
+    };
+
+    await ctx.editMessageText(formatNews(currentNews), { ...keyboard, parse_mode: 'Markdown' });
+    await ctx.answerCbQuery();
+  } else if (data.startsWith('delete_')) {
+    const newsId = data.split('_')[1];
+    const success = await deleteNews(newsId);
+    
+    if (success) {
+      await ctx.answerCbQuery('Новость успешно удалена!');
+      await ctx.deleteMessage();
+    } else {
+      await ctx.answerCbQuery('Ошибка при удалении новости');
+    }
+  } else if (data === 'edit_title') {
+    botState.currentStep = 'edit_title';
+    botState.awaitingTitle = true;
+    await ctx.editMessageText('Введите новый заголовок:');
+  } else if (data === 'edit_content') {
+    botState.currentStep = 'edit_content';
+    botState.awaitingText = true;
+    await ctx.editMessageText('Введите новый текст:');
+  } else if (data === 'edit_image') {
+    botState.currentStep = 'edit_image';
+    botState.awaitingImage = true;
+    await ctx.editMessageText('Отправьте новое изображение:');
+  } else if (data === 'publish') {
+    await saveNews(ctx);
+  }
+  
+  await ctx.answerCbQuery();
+});
+
+// Функция сохранения новости
+const saveNews = async (ctx) => {
+  const { title, content, image_url } = botState.currentNews;
+  
+      const { data, error } = await supabase
+        .from('news')
+    .insert([{ title, content, image_url }]);
+
+  if (error) {
+    console.error('Ошибка при сохранении новости:', error);
+    ctx.reply('Произошла ошибка при сохранении новости');
+        } else {
+    ctx.reply('Новость успешно добавлена!');
+  }
+
+  // Сброс состояния
+  botState.awaitingImage = false;
+  botState.currentNews = null;
+};
+
+// Запуск бота
+bot.launch().then(() => {
+  console.log('Бот запущен');
+}).catch((error) => {
+  console.error('Ошибка при запуске бота:', error);
+});
+
+// Обработка завершения работы
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 // Инициализация Express
 const app = express();
@@ -288,37 +426,3 @@ app.listen(PORT, () => {
 
 // Экспортируем бота
 export default bot;
-
-// Функция для публикации новости
-async function publishNews(chatId, state) {
-  try {
-    // Публикуем новость
-    const { data, error } = await supabase
-      .from('news')
-      .insert([{
-        title: state.title,
-        content: state.content,
-        image_url: state.image,
-        created_at: new Date().toISOString()
-      }])
-      .select();
-
-    if (error) throw error;
-
-    // Отправляем сообщение в группу
-    const groupChatId = process.env.TELEGRAM_CHAT_ID;
-    let message = `📢 Новая новость!\n\n${state.title}\n\n${state.content}`;
-    
-    if (state.image) {
-      await bot.sendPhoto(groupChatId, state.image, { caption: message });
-    } else {
-      await bot.sendMessage(groupChatId, message);
-    }
-
-    bot.sendMessage(chatId, 'Новость успешно опубликована!');
-    clearPostState(chatId);
-  } catch (err) {
-    console.error('Ошибка при публикации:', err);
-    bot.sendMessage(chatId, 'Произошла ошибка при публикации. Попробуйте позже.');
-  }
-}
