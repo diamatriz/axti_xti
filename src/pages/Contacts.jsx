@@ -4,49 +4,65 @@ import '../styles/contacts.css';
 const Contacts = () => {
   const sections = [
     {
-      title: 'Слушать',
+      title: 'слушать:',
       color: 'red',
       items: [
         {
-          title: 'Яндекс.Музыка.............................',
+          title: 'яндекс.музыка',
           link: 'https://music.yandex.ru/artist/9677192'
         },
         {
-          title: 'Spotify....................................',
+          title: 'вк.мьюзик',
+          link: 'https://vk.com/artist/axti_xti'
+        },
+        {
+          title: 'спотифай',
           link: 'https://open.spotify.com/artist/25zqOSe1olscQQfFUNZ0ES'
         },
         {
-          title: 'Bandcamp....................................',
+          title: 'эпл.мьюзик',
+          link: 'https://music.apple.com/ru/artist/axti-xti/1523615909'
+        },
+        {
+          title: 'бэндкемп',
           link: 'https://axti-xti.bandcamp.com/'
         }
       ]
     },
     {
-      title: 'Следить',
+      title: 'следить:',
       color: 'blue',
       items: [
         {
-          title: 'Telegram....................................',
+          title: 'телеграм',
           link: 'https://t.me/axtixti'
         },
         {
-          title: 'YouTube....................................',
+          title: 'вконтакте',
+          link: 'https://vk.com/axtixti'
+        },
+        {
+          title: 'ютуб',
           link: 'https://youtube.com/@axti-xti5018'
+        },
+        {
+          title: 'инстаграм',
+          link: 'https://instagram.com/axtixti'
         }
       ]
     },
     {
-      title: 'Поддержать',
+      title: 'поддержать:',
       color: 'red',
       items: [
         {
-          title: 'Донат....................................',
+          title: 'Донат',
           link: 'https://tips.yandex.ru/guest/payment/5470100'
         }
       ]
     },
     {
-      title: 'Написать',
+      title: 'написать:',
       color: 'blue',
       items: [
         {
