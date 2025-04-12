@@ -1,0 +1,61 @@
+.not-found-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  background: radial-gradient(circle at center, #00ff00 0%, #ff0000 100%);
+  color: #fff;
+  font-family: 'Dela Gothic One', cursive;
+}
+
+.not-found-container h1 {
+  font-size: 8rem;
+  margin: 0;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.not-found-container h2 {
+  font-size: 2rem;
+  margin: 1rem 0;
+}
+
+.not-found-container p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.home-link {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background: #fff;
+  color: #ff0000;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.home-link:hover {
+  background: #000;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .not-found-container h1 {
+    font-size: 6rem;
+  }
+
+  .not-found-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .not-found-container p {
+    font-size: 1rem;
+  }
+} 

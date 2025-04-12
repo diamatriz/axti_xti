@@ -5,7 +5,10 @@ import { resolve } from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './',
+  server: {
+    port: 5173,
+    host: true
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -18,6 +21,12 @@ export default defineConfig({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'
       }
-    }
+    },
+    sourcemap: true
+  },
+  base: '/',
+  preview: {
+    port: 5173,
+    host: true
   }
 })
