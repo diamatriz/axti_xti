@@ -1,7 +1,6 @@
 // src/pages/About.jsx
 import React, { useEffect, useRef } from 'react';
 import '../styles/about.css'; // Стили для About секции
-import TypingText from '../components/TypingText'; // Компонент для анимации текста
 import member1 from '../assets/member1.jpg'; // Изображения участников
 import member2 from '../assets/member2.jpg';
 import member3 from '../assets/member3.jpg';
@@ -51,7 +50,7 @@ const About = () => {
           <div key={index} className="member-column">
             <img src={member.image} alt={member.name} className="member-image" />
             <div className="text-wrapper">
-              <TypingText text={member.text} />
+              <p>{member.text}</p>
             </div>
           </div>
         ))}

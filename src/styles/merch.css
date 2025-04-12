@@ -1,0 +1,332 @@
+@import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap');
+
+.merch-section {
+  padding: 2rem;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Dela Gothic One', cursive;
+  background: radial-gradient(circle at center, rgba(13, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 100%);
+}
+
+.merch-section::before {
+  display: none;
+}
+
+.merch-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+  background: #000;
+  border-radius: 4px;
+  overflow: hidden;
+  width: fit-content;
+  margin: 0 auto 2rem;
+}
+
+.merch-tab {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  color: #fff;
+  border: none;
+  font-family: 'Dela Gothic One', cursive;
+}
+
+.merch-tab:first-child {
+  background: #ff0000;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.merch-tab:last-child {
+  background: #0000ff;
+}
+
+.merch-tab:hover {
+  transform: translateY(-2px);
+}
+
+.merch-tab:active {
+  transform: translateY(1px);
+}
+
+.merch-tab.active {
+  position: relative;
+}
+
+.merch-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #fff;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.merch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.merch-card {
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.merch-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.merch-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.merch-image.gif {
+  object-fit: contain;
+  background: #000;
+}
+
+.merch-image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.merch-image-container:hover .merch-image.gif {
+  opacity: 0.8;
+}
+
+.merch-info {
+  padding: 1rem;
+  background: #000;
+}
+
+.merch-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.merch-price {
+  font-size: 1rem;
+  color: #fff;
+  opacity: 0.9;
+}
+
+.merch-status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.merch-status.available {
+  background: rgba(0, 255, 0, 0.2);
+  color: #0f0;
+}
+
+.merch-status.sold-out {
+  background: rgba(255, 0, 0, 0.2);
+  color: #f00;
+}
+
+.merch-status.archived {
+  background: rgba(128, 128, 128, 0.2);
+  color: #888;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.modal-content {
+  background: #000;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: default;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.carousel-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-button.prev {
+  left: 1rem;
+}
+
+.carousel-button.next {
+  right: 1rem;
+}
+
+.carousel-button svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.modal-info {
+  margin-top: 1rem;
+  color: #fff;
+}
+
+.modal-title {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.modal-price {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+.modal-description {
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .merch-section {
+    padding: 1rem;
+  }
+
+  .merch-tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .merch-tab {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+  }
+
+  .merch-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  .carousel {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .merch-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .carousel {
+    height: 200px;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+  }
+
+  .modal-description {
+    font-size: 0.9rem;
+  }
+} 

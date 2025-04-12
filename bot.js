@@ -4,15 +4,34 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import sharp from 'sharp';
+import express from 'express';
+import cors from 'cors';
+import { Telegraf } from 'telegraf';
 
-// Загружаем переменные окружения
+// Загружаем переменные окружения из .env файла
 dotenv.config();
+
+// Проверяем наличие необходимых переменных окружения
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+  console.error('Ошибка: SUPABASE_URL и SUPABASE_KEY должны быть определены в .env файле');
+  process.exit(1);
+}
 
 // Инициализация бота в режиме long polling
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 // Инициализация Supabase клиента
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false
+    }
+  }
+);
 
 // Хранилище состояний
 const postStates = {};
@@ -217,5 +236,89 @@ bot.on('callback_query', async (query) => {
   }
 });
 
+// Инициализация Express
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Middleware для установки заголовков
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  next();
+});
+
+// API для получения новостей
+app.get('/api/news', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('news')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!data) {
+      return res.status(200).json([]);
+    }
+
+    // Преобразуем данные в нужный формат
+    const formattedData = data.map(item => ({
+      id: item.id,
+      title: item.title || '',
+      content: item.content || '',
+      image_url: item.image_url || null,
+      created_at: item.created_at || new Date().toISOString()
+    }));
+
+    res.json(formattedData);
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Запуск сервера
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`API сервер запущен на порту ${PORT}`);
+});
+
 // Экспортируем бота
 export default bot;
+
+// Функция для публикации новости
+async function publishNews(chatId, state) {
+  try {
+    // Публикуем новость
+    const { data, error } = await supabase
+      .from('news')
+      .insert([{
+        title: state.title,
+        content: state.content,
+        image_url: state.image,
+        created_at: new Date().toISOString()
+      }])
+      .select();
+
+    if (error) throw error;
+
+    // Отправляем сообщение в группу
+    const groupChatId = process.env.TELEGRAM_CHAT_ID;
+    let message = `📢 Новая новость!\n\n${state.title}\n\n${state.content}`;
+    
+    if (state.image) {
+      await bot.sendPhoto(groupChatId, state.image, { caption: message });
+    } else {
+      await bot.sendMessage(groupChatId, message);
+    }
+
+    bot.sendMessage(chatId, 'Новость успешно опубликована!');
+    clearPostState(chatId);
+  } catch (err) {
+    console.error('Ошибка при публикации:', err);
+    bot.sendMessage(chatId, 'Произошла ошибка при публикации. Попробуйте позже.');
+  }
+}
