@@ -4,6 +4,7 @@ import '../styles/about.css'; // Стили для About секции
 import member1 from '../assets/member1.jpg'; // Изображения участников
 import member2 from '../assets/member2.jpg';
 import member3 from '../assets/member3.jpg';
+import TypingText from '../components/TypingText';
 
 const About = () => {
   const audioRef = useRef(null); // Создаем реф для аудио
@@ -50,7 +51,10 @@ const About = () => {
           <div key={index} className="member-column">
             <img src={member.image} alt={member.name} className="member-image" />
             <div className="text-wrapper">
-              <p>{member.text}</p>
+              <TypingText
+                text={member.text}
+                speed={30}
+              />
             </div>
           </div>
         ))}
