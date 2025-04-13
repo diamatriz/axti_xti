@@ -1,6 +1,7 @@
 // src/App.jsx
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Home from './pages/Home';
 import About from './pages/About';
 import Releases from './pages/Releases';
@@ -8,26 +9,44 @@ import Videos from './pages/Videos';
 import News from './pages/News';
 import Contacts from './pages/Contacts';
 import NotFound from './pages/NotFound';
+import AuthForm from './components/AuthForm';
+import ConfirmEmail from './pages/ConfirmEmail';
 import './App.css';
 import './styles/homeButton.css';
 import { Link } from 'react-router-dom';
 
+const PrivateRoute = ({ children }) => {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/auth" />;
+};
+
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/releases" element={<Releases />} />
-        <Route path="/videos" element={<Videos />} />
-        <Route path="/news" element={<News />} />
-        <Route path="/contacts" element={<Contacts />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Link to="/" className="home-button">
-        <span className="home-icon">🏠</span>
-      </Link>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            } />
+            <Route path="/about" element={<About />} />
+            <Route path="/releases" element={<Releases />} />
+            <Route path="/videos" element={<Videos />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/contacts" element={<Contacts />} />
+            <Route path="/auth" element={<AuthForm />} />
+            <Route path="/auth/callback" element={<AuthForm />} />
+            <Route path="/auth/confirm" element={<ConfirmEmail />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Link to="/" className="home-button">
+            <span className="home-icon">🏠</span>
+          </Link>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 };
 
