@@ -3,12 +3,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import '../styles/Profile.css';
 
+const EMOJI_AVATARS = ['😀', '😎', '🤖', '🐱', '🦊', '🐼', '🦁', '🐶', '🐵', '🦄'];
+
 const Profile = () => {
   const { user } = useAuth();
   const [username, setUsername] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [selectedEmoji, setSelectedEmoji] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     if (user) {
@@ -38,7 +40,7 @@ const Profile = () => {
 
       const data = await response.json();
       setUsername(data.username || '');
-      setAvatarUrl(data.avatar_url || '');
+      setSelectedEmoji(data.avatar_url || EMOJI_AVATARS[Math.floor(Math.random() * EMOJI_AVATARS.length)]);
     } catch (error) {
       console.error('Error fetching profile:', error);
       setMessage({ type: 'error', text: 'Failed to load profile' });
@@ -62,7 +64,7 @@ const Profile = () => {
         body: JSON.stringify({
           action: 'update_profile',
           username,
-          avatar_url
+          avatar_url: selectedEmoji
         })
       });
 
@@ -108,16 +110,26 @@ const Profile = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="avatarUrl">URL аватара</label>
-            <input
-              type="url"
-              id="avatarUrl"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-            />
+            <label>Выберите аватар</label>
+            <div className="emoji-selector">
+              {EMOJI_AVATARS.map((emoji, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className={`emoji-option ${selectedEmoji === emoji ? 'selected' : ''}`}
+                  onClick={() => setSelectedEmoji(emoji)}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {message && <div className="message">{message.text}</div>}
+          {message && (
+            <div className={`message ${message.type}`}>
+              {message.text}
+            </div>
+          )}
 
           <button type="submit" disabled={isLoading}>
             {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
