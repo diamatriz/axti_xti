@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: 'https://axti-xti.vercel.app/auth/confirm',
       },
     });
     if (error) throw error;

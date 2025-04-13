@@ -19,11 +19,13 @@
 .confirm-email-content h2 {
   margin-bottom: 1rem;
   color: #333;
+  font-size: 1.5rem;
 }
 
 .confirm-email-content p {
   margin-bottom: 1.5rem;
   color: #666;
+  line-height: 1.5;
 }
 
 .loading-spinner {
@@ -50,6 +52,7 @@
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.3s;
+  text-decoration: none;
 }
 
 .auth-button:hover {

@@ -18,7 +18,7 @@ const ConfirmEmail = () => {
         
         if (token && type === 'email') {
           await confirmEmail(token);
-          navigate('/');
+          navigate('/news');
         } else {
           setError('Invalid confirmation link');
         }
@@ -36,7 +36,7 @@ const ConfirmEmail = () => {
     return (
       <div className="confirm-email-container">
         <div className="confirm-email-content">
-          <h2>Confirming your email...</h2>
+          <h2>Подтверждение email...</h2>
           <div className="loading-spinner"></div>
         </div>
       </div>
@@ -47,10 +47,10 @@ const ConfirmEmail = () => {
     return (
       <div className="confirm-email-container">
         <div className="confirm-email-content">
-          <h2>Error</h2>
+          <h2>Ошибка</h2>
           <p>{error}</p>
           <button onClick={() => navigate('/auth')} className="auth-button">
-            Back to Login
+            Вернуться к авторизации
           </button>
         </div>
       </div>
@@ -60,10 +60,10 @@ const ConfirmEmail = () => {
   return (
     <div className="confirm-email-container">
       <div className="confirm-email-content">
-        <h2>Email Confirmed!</h2>
-        <p>Your email has been successfully confirmed.</p>
-        <button onClick={() => navigate('/')} className="auth-button">
-          Go to Home
+        <h2>Email подтвержден!</h2>
+        <p>Ваш email успешно подтвержден. Перенаправляем вас на страницу новостей...</p>
+        <button onClick={() => navigate('/news')} className="auth-button">
+          Перейти к новостям
         </button>
       </div>
     </div>
