@@ -1,11 +1,14 @@
 import React from 'react';
-import HeroSection from '../components/HeroSection';
+import AuthForm from '../components/AuthForm';
 import '../styles/home.css';
+import '../styles/auth.css';
 
-export default function Home() {
+const Home = () => {
   return (
-    <>
-      <HeroSection />
-    </>
+    <div className="home-container">
+      <AuthForm />
+    </div>
   );
-}
+};
+
+export default Home;
