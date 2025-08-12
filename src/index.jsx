@@ -10,7 +10,6 @@ root.render(
     <App />
   </ErrorBoundary>
 );
-
 export { default as About } from './pages/About';
 export { default as Releases } from './pages/Releases';
 export { default as Video } from './pages/Video';
